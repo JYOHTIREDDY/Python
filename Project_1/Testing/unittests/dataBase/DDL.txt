@@ -1,0 +1,35 @@
+-- Create a table for storing information about users
+CREATE TABLE users (
+    user_id             SERIAL PRIMARY KEY,
+    username            VARCHAR(50) NOT NULL,
+    email               VARCHAR(100) UNIQUE NOT NULL,
+    password            VARCHAR(255) NOT NULL,
+    first_name          VARCHAR(50),
+    last_name           VARCHAR(50),
+    created_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    active              BOOLEAN
+);
+
+
+-- Create a table for storing posts made by users
+CREATE TABLE posts (
+    post_id             SERIAL PRIMARY KEY,
+    user_id             INT REFERENCES users(user_id),
+    content             TEXT NOT NULL,
+    created_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create a table for storing comments on posts
+CREATE TABLE comments (
+    comment_id          SERIAL PRIMARY KEY,
+    post_id             INT REFERENCES posts(post_id),
+    user_id             INT REFERENCES users(user_id),
+    content             TEXT NOT NULL,
+    created_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create an index on the username column for faster lookups
+CREATE INDEX idx_username ON users(username);
+
+-- Create an index on the email column for faster lookups
+CREATE INDEX idx_email ON users(email);
