@@ -1,4 +1,61 @@
-.App {
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.login-box {
+  background-color: #f0f0f0;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.welcome-text {
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.logout-btn,
+.login-btn {
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+.logout-btn {
+  background-color: #dc3545;
+}
+
+.login-btn {
+  margin-top: 10px;
+}
+
+.input-label {
+  margin-bottom: 5px;
+  display: block;
+}
+
+.input-field {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+
+
+/* .App {
   text-align: center;
 }
 
@@ -35,4 +92,4 @@
   to {
     transform: rotate(360deg);
   }
-}
+} */

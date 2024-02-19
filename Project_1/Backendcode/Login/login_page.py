@@ -1,19 +1,20 @@
 import psycopg2
 from psycopg2 import Error
-from code.awsUtil.rds_connection import connect_to_postgres, get_secret
-from code.dataBase.queries import FETCH_USER_CREDENTIALS
+from Backendcode.awsUtil.rds_connection import connect_to_postgres, get_secret
+from Backendcode.dataBase.queries import FETCH_USER_CREDENTIALS
 
-# secret_name = your_db_name #replace with your database name
+# secret_name = nam_aws_SM  #replace with you correct name
 # secret_credentials = get_secret(secret_name)
-secret_credentials = psycopg2.connect(
-        user="IONE",
-        password="Jyothi@143",
-        host="localhost",
-        port="5432",
-        database="IONE"
-    )
 
 def fetch_user_credentials(username):
+    # secret_credentials are hardcoded here since , I have a plan of keeping the secret_credentials in 
+    # AWS secrets manager which is not possible to use while all the setup is in local, So we are hard 
+    # coding them directly in code, Usually we use get_secret function to fetch them from SM
+    secret_credentials = {'password': 'Jyothi@143',
+                   'username': 'REDDY',
+                   'host': "localhost",
+                   'port': "5432",
+                   'database': "IONE"}
     connection = connect_to_postgres(secret_credentials)
     if connection:
         try:

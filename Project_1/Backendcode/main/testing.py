@@ -2,7 +2,7 @@ import sys
 sys.path.append('/path/to/code')
 
 
-from code.Login.signup_page import *
+from Backendcode.Login.signup_page import *
 from Login.login_page import *
 from UserProfile.user_profile import *
 

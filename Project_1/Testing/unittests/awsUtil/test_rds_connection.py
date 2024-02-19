@@ -18,7 +18,7 @@ code_dir = os.path.join(dir_rb, 'code')
 sys.path.insert(0, code_dir)
 
 # Now you should be able to import from awsUtil package
-from Project_1.code.awsUtil.rds_connection import connect_to_postgres, get_secret
+from Project_1.Backendcode.awsUtil.rds_connection import connect_to_postgres, get_secret
 
 
 

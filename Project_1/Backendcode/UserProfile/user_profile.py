@@ -1,7 +1,7 @@
 import psycopg2
 from psycopg2 import Error
-from code.awsUtil.rds_connection import connect_to_postgres, get_secret
-from code.dataBase.queries import FETCH_USER_PROFILE, UPDATE_USER_PROFILE
+from Backendcode.awsUtil.rds_connection import connect_to_postgres, get_secret
+from Backendcode.dataBase.queries import FETCH_USER_PROFILE, UPDATE_USER_PROFILE
 
 
 # secret_name = your_db_name #replace with your database name

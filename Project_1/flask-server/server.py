@@ -1,106 +1,126 @@
 from flask import Flask, request, jsonify
-import psycopg2
 import json
-import boto3
-from ..code.awsUtil.rds_connection import get_secret, connect_to_postgres
+import os
+import sys
+import random
+import string
+import smtplib
+from email.mime.text import MIMEText
+dir_main = os.path.dirname(os.path.dirname((__file__)))
+sys.path.insert(0, dir_main)
+# Import necessary functions from your modules
+from Backendcode.awsUtil.rds_connection import get_secret, connect_to_postgres
+from Backendcode.Login.login_page import fetch_user_credentials, check_login
+from Backendcode.Login.signup_page import signup
 
 app = Flask(__name__)
 
-def check_login(username, password):
-    user_data = fetch_user_credentials(username)
-    if user_data:
-        saved_username, saved_password, active = user_data
-        if active:
-            if saved_password == password:
-                print("Login successful!")
-                return True
-            else:
-                print("Incorrect password!")
-                return False
-        else:
-            print("User account is inactive!")
-            return False
-    else:
-        print("User not found!")
+# Generate OTP
+def generate_otp():
+    return ''.join(random.choices(string.digits, k=6))
+
+# Send OTP to user's email
+# Send OTP to user's email
+def send_otp_email(email, otp):
+    try:
+        smtp_server = 'smtp.gmail.com'  # Replace 'your_smtp_server' with the SMTP server address
+        smtp_port = 587  # Replace with the appropriate port number if different
+        sender_email = 'jyothireddy.01108@gmail.com"'  # Replace with your sender email address
+        sender_password = 'Jyothi@143'  # Replace with your sender email password
+        
+        message = MIMEText(f'Your OTP is: {otp}')
+        message['Subject'] = 'OTP Verification'
+        message['From'] = sender_email
+        message['To'] = email
+
+        with smtplib.SMTP(smtp_server, smtp_port) as server:
+            server.starttls()
+            server.login(sender_email, sender_password)
+            server.sendmail(sender_email, [email], message.as_string())
+        return True
+    except Exception as e:
+        print("Error sending email:", e)
         return False
 
-def get_secret(secret_name):
-    session = boto3.session.Session()
-    client = session.client(service_name='secretsmanager')
-
-    try:
-        response = client.get_secret_value(SecretId=secret_name)
-    except Exception as err:
-        raise err
-    else:
-        if 'SecretString' in response:
-            secret = json.loads(response['SecretString'])
-            return secret
-        else:
-            raise ValueError("SecretString not found in the response from AWS Secrets Manager.")
-
-# def connect_to_postgres(credentials):
-#     try:
-#         conn = psycopg2.connect(
-#             host=credentials['host'],
-#             port=credentials['port'],
-#             user=credentials['username'],
-#             password=credentials['password'],
-#             database=credentials['database']
-#         )
-#         return conn
-#     except Exception as err:
-#         raise err
-
-def fetch_user_credentials(username):
-    credentials = {'password': 'Jyothi@143',
-                   'username': 'REDDY',
-                   'host': "localhost",
-                   'port': "5432",
-                   'database': "IONE"}
-    connection = connect_to_postgres(credentials)
-    if connection:
-        try:
-            cursor = connection.cursor()
-            query = f"SELECT username, password, active FROM users WHERE username = '{username}'"
-            cursor.execute(query)
-            user_data = cursor.fetchone()
-            cursor.close()
-            connection.close()
-            return user_data
-        except Exception as error:
-            print("Error fetching user credentials:", error)
-            return None
-    else:
-        return None
 
 @app.route("/login", methods=['POST'])
 def login():
     data = request.get_json()
     username = data.get('username')
     password = data.get('password')
+    action = data.get('action')
+    email = data.get('email')
+    otp = data.get('otp')
 
-    # Authenticate user
-    if check_login(username, password):
-        return jsonify({'message': 'Login successful'})
+    if action == 'login':
+        if check_login(username, password):
+            return jsonify({'message': 'Login successful'})
+        else:
+            return jsonify({'message': 'Invalid username or password'}), 401
+    elif action == 'signup':
+        if not otp:
+            # Generate OTP and send it to user's email
+            otp = generate_otp()
+            if send_otp_email(email, otp):
+                return jsonify({'message': 'OTP sent to your email. Please check your inbox.', 'otp': otp})
+            else:
+                return jsonify({'message': 'Failed to send OTP'}), 500
+        else:
+            # Verify OTP
+            if signup(username, email, password, otp):
+                return jsonify({'message': 'Signup successful'})
+            else:
+                return jsonify({'message': 'Invalid OTP'}), 401
     else:
-        return jsonify({'message': 'Invalid username or password'}), 401
+        return jsonify({'message': 'Invalid action'})
+
+@app.route("/signup/request-otp", methods=['POST'])
+def request_otp():
+    data = request.get_json()
+    email = data.get('email')
+    otp = generate_otp()
+    if send_otp_email(email, otp):
+        return jsonify({'message': 'OTP sent to your email. Please check your inbox.', 'otp': otp})
+    else:
+        return jsonify({'message': 'Failed to send OTP'}), 500
 
 if __name__ == "__main__":
     app.run(debug=True)
 
 
-# from flask import Flask
+
+
+# from flask import Flask, request, jsonify
+# import json
+# import os
+# import sys
+# dir_main = os.path.dirname(os.path.dirname((__file__)))
+# sys.path.insert(0, dir_main)
+# from Backendcode.awsUtil.rds_connection import get_secret, connect_to_postgres
+# from Backendcode.Login.login_page import fetch_user_credentials, check_login
+# from Backendcode.Login.signup_page import signup
 
 # app = Flask(__name__)
 
+# @app.route("/login", methods=['POST'])
+# def login():
+#     data = request.get_json()
+#     username = data.get('username')
+#     password = data.get('password')
+#     action = data.get('action')
+#     email = data.get('email')
 
-
-
-
-# @app.route("/members")
-# def members():
-#     return{"members" : ["member1", "member2"]}
+#     # Authenticate user
+#     if action == 'login':
+#         if check_login(username, password):
+#             return jsonify({'message': 'Login successful'})
+#         else:
+#             return jsonify({'message': 'Invalid username or password'}), 401
+#     elif action == 'signup':
+#         signup(username, email, password)
+#         return jsonify({'message': 'Signup successful'})
+#     else:
+#         return jsonify({'message': 'Invalid action'})
 
 # if __name__ == "__main__":
-#     app.run(debug = True)
+#     app.run(debug=True)

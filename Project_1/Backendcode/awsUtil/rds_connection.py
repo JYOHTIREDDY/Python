@@ -53,7 +53,7 @@ def connect_to_postgres(credentials):
             port=credentials['port'],
             user=credentials['username'],
             password=credentials['password'],
-            database='database_name'
+            database='IONE'
         )
         return conn
     except Exception as err:
